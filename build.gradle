@@ -1,0 +1,48 @@
+plugins {
+	id 'java'
+	id 'eclipse'
+	id 'maven-publish'
+}
+
+version = '0.0'
+
+sourceSets {
+	library
+
+	main {
+		compileClasspath += library.output
+	}
+}
+
+compileJava.dependsOn compileLibraryJava
+
+task execJar(type: Jar) {
+	dependsOn classes
+	group = 'Build'
+	from sourceSets.main.output, sourceSets.library.output
+	manifest.attributes('Main-Class': 'github._1p6.lamb.launch.Main')
+}
+
+task libraryJar(type: Jar) {
+	dependsOn classes
+	group = 'Build'
+	from sourceSets.library.output
+	archiveClassifier = 'library'
+}
+
+assemble.dependsOn execJar, libraryJar
+
+task run(type: JavaExec) {
+	classpath = files execJar
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = 'com.github.1p6'
+			artifactId = 'lamb-java'
+			artifact execJar
+			artifact libraryJar
+		}
+	}
+}
